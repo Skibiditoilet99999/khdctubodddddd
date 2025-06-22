@@ -1,5 +1,20 @@
 <?php
 date_default_timezone_set('Asia/Ho_Chi_Minh');
+// gàm hiệu ứng
+function a($text, $delay = 100000, $loop = false) {
+    $colors = ["\033[31m", "\033[33m", "\033[32m", "\033[36m", "\033[34m", "\033[35m"];
+    $reset = "\033[0m";
+    
+    do {
+        if ($loop) system('clear');
+        for ($i = 0; $i < strlen($text); $i++) {
+            echo $colors[$i % count($colors)] . $text[$i];
+            usleep($delay);
+        }
+        echo $reset . PHP_EOL;
+        if ($loop) usleep(200000);
+    } while ($loop);
+}
 
 // Hàm kiểm tra kết nối ADB
 function check_adb_connection() {
@@ -852,7 +867,7 @@ while (true) {
                 if ($checklan == 3) {
                     break;
                 }
-                echo "\033[1;35mĐang Nhận Tiền Lần 2:>        \r";
+                a "\033[1;35mĐang Nhận Tiền Lại...        \r";
                 $nhantien = hoanthanh($ads_id, $account_id);
             }
         }
