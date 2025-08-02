@@ -230,8 +230,7 @@ def main():
     create_multiple_accounts(num_accounts, filename, proxy_file)
 
 if __name__ == "__main__":
-    main()
-while True:
+    while True:
         try:
             max_threads = int(input(f"{Fore.GREEN}Nhập số luồng reg (tối đa 5): {Style.RESET_ALL}"))
             if 1 <= max_threads <= 5:
@@ -239,3 +238,5 @@ while True:
             print(f"{Fore.RED}✖ Nhập số từ 1 đến 5!{Style.RESET_ALL}")
         except ValueError:
             print(f"{Fore.RED}✖ Vui lòng nhập số hợp lệ!{Style.RESET_ALL}")
+
+    main()
