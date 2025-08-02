@@ -165,7 +165,7 @@ def worker(task_queue, filename, proxies):
         task_queue.task_done()
         time.sleep(random.uniform(3, 6))
 
-def create_multiple_accounts(num_accounts, filename, proxy_file=None, max_threads=max_threads):
+def create_multiple_accounts(num_accounts, filename, proxy_file=None, max_threads):
     clear_screen()
     print(f"{Fore.GREEN}╔════════════════════════════════════╗{Style.RESET_ALL}")
     print(f"{Fore.GREEN}║      BẮT ĐẦU TẠO {num_accounts} TÀI KHOẢN      ║{Style.RESET_ALL}")
@@ -180,7 +180,7 @@ def create_multiple_accounts(num_accounts, filename, proxy_file=None, max_thread
         task_queue.put(i)
 
     # Giới hạn số luồng tối đa 5
-    max_threads = min(max_threads)
+    max_threads = min(max_threads=5)
     threads = []
     for _ in range(max_threads):
         t = threading.Thread(target=worker, args=(task_queue, filename, proxies))
