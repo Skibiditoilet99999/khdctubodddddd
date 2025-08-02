@@ -95,8 +95,8 @@ def create_mailtm_account(session, account_num, max_retries=3):
     }
     domain = get_available_domains(session)
     payload = {
-        "address": f"phuocdevdayne{random.randint(1000, 9999)}@{domain}",
-        "password": f"phuocan{random.randint(1000, 9999)}"
+        "address": f"sieucode{random.randint(1000, 9999)}@{domain}",
+        "password": f"sieucode{random.randint(1000, 9999)}"
     }
     
     for attempt in range(max_retries):
@@ -149,65 +149,49 @@ def save_to_file(username, password, filename):
         print(f"{Fore.RED}✖ Lỗi khi lưu file: {e}{Style.RESET_ALL}")
         return False
 
-import queue
-
-def worker(task_queue, filename, proxies):
-    while not task_queue.empty():
-        account_num = task_queue.get()
+def create_multiple_accounts(num_accounts, filename, proxy_file=None):
+    clear_screen()
+    print(f"{Fore.CYAN}╔════════════════════════════════════╗{Style.RESET_ALL}")
+    print(f"{Fore.CYAN}║      BẮT ĐẦU TẠO {num_accounts} TÀI KHOẢN      ║{Style.RESET_ALL}")
+    print(f"{Fore.CYAN}╚════════════════════════════════════╝{Style.RESET_ALL}")
+    time.sleep(1)
+    
+    proxies = load_proxies(proxy_file) if proxy_file else []
+    success_count = 0
+    attempt_count = 0
+    
+    while success_count < num_accounts:
+        attempt_count += 1
         proxy = random.choice(proxies) if proxies else None
         session = setup_session(proxy)
-        username, password = create_mailtm_account(session, account_num)
+        if proxy and attempt_count == 1:
+            print(f"{Fore.YELLOW}Đang sử dụng proxy: {proxy}{Style.RESET_ALL}")
+        
+        username, password = create_mailtm_account(session, success_count + 1)
         if username and password:
             if save_to_file(username, password, filename):
-                print(f"{Fore.GREEN}✔ [{account_num}] Tạo thành công: {username} | {password}{Style.RESET_ALL}")
-        else:
-            print(f"{Fore.RED}✖ [{account_num}] Tạo thất bại.{Style.RESET_ALL}")
-        task_queue.task_done()
-        time.sleep(random.uniform(3, 6))
-
-def create_multiple_accounts(num_accounts, filename, proxy_file=None, max_threads):
-    clear_screen()
-    print(f"{Fore.GREEN}╔════════════════════════════════════╗{Style.RESET_ALL}")
-    print(f"{Fore.GREEN}║      BẮT ĐẦU TẠO {num_accounts} TÀI KHOẢN      ║{Style.RESET_ALL}")
-    print(f"{Fore.GREEN}╚════════════════════════════════════╝{Style.RESET_ALL}")
-    time.sleep(1)
-
-    proxies = load_proxies(proxy_file) if proxy_file else []
-
-    # Queue chứa công việc (số tài khoản)
-    task_queue = queue.Queue()
-    for i in range(1, num_accounts + 1):
-        task_queue.put(i)
-
-    # Giới hạn số luồng tối đa 5
-    max_threads = min(max_threads=5)
-    threads = []
-    for _ in range(max_threads):
-        t = threading.Thread(target=worker, args=(task_queue, filename, proxies))
-        t.start()
-        threads.append(t)
-
-    for t in threads:
-        t.join()
-
+                success_count += 1
+                print(f"{Fore.GREEN}✔ [{success_count}/{num_accounts}] Tài khoản: {username} | {password}{Style.RESET_ALL}")
+        time.sleep(random.uniform(3, 7))
+        
     print(f"{Fore.CYAN}╔════════════════════════════════════╗{Style.RESET_ALL}")
-    print(f"{Fore.CYAN}║ HOÀN TẤT! ĐÃ XỬ LÝ {num_accounts} TÀI KHOẢN     ║{Style.RESET_ALL}")
+    print(f"{Fore.CYAN}║ HOÀN TẤT! TẠO ĐƯỢC {success_count}/{num_accounts} TÀI KHOẢN  ║{Style.RESET_ALL}")
     print(f"{Fore.CYAN}╚════════════════════════════════════╝{Style.RESET_ALL}")
 
 def main():
     clear_screen()
     # Giao diện mới với Admin
     print(f"{Fore.MAGENTA}╔════════════════════════════════════════════╗{Style.RESET_ALL}")
-    print(f"{Fore.MAGENTA}║      MAILTM ACCOUNT CREATOR v25             ║{Style.RESET_ALL}")
-    print(f"{Fore.MAGENTA}║      Admin: PHUOC AN + BVZone                     ║{Style.RESET_ALL}")
+    print(f"{Fore.MAGENTA}║      MAILTM ACCOUNT CREATOR v25           ║{Style.RESET_ALL}")
+    print(f"{Fore.MAGENTA}║      Admin: BVTOOL                      ║{Style.RESET_ALL}")
     print(f"{Fore.MAGENTA}╚════════════════════════════════════════════╝{Style.RESET_ALL}")
-    typing_effect(f"{Fore.YELLOW}Công cụ tạo MailTM{Style.RESET_ALL}")
+    typing_effect(f"{Fore.YELLOW}Công cụ tạo tài khoản MailTM với proxy support{Style.RESET_ALL}")
     print(f"{Fore.CYAN}--------------------------------------------{Style.RESET_ALL}")
     time.sleep(1)
     
     while True:
         try:
-            num_accounts = int(input(f"{Fore.GREEN}Nhập số lượng tài khoản mail.tm cần tạo: {Style.RESET_ALL}"))
+            num_accounts = int(input(f"{Fore.GREEN}Nhập số lượng tài khoản cần tạo: {Style.RESET_ALL}"))
             if num_accounts <= 0:
                 print(f"{Fore.RED}✖ Số lượng phải lớn hơn 0!{Style.RESET_ALL}")
                 continue
@@ -222,21 +206,12 @@ def main():
     if use_proxy:
         proxy_file = input(f"{Fore.GREEN}Nhập đường dẫn file proxy (IP:PORT, mỗi dòng 1 proxy): {Style.RESET_ALL}")
     
-    print(f"{Fore.YELLOW}Đường dẫn file lưu mail : {filename}{Style.RESET_ALL}")
+    print(f"{Fore.YELLOW}Đường dẫn file lưu: {filename}{Style.RESET_ALL}")
     if proxy_file:
         print(f"{Fore.YELLOW}File proxy: {proxy_file}{Style.RESET_ALL}")
     print(f"{Fore.CYAN}--------------------------------------------{Style.RESET_ALL}")
-    while True:
-        try:
-            max_threads = int(input(f"{Fore.GREEN}Nhập số luồng reg (tối đa 5): {Style.RESET_ALL}"))
-            if 1 <= max_threads <= 5:
-                break
-            print(f"{Fore.RED}✖ Nhập số từ 1 đến 5!{Style.RESET_ALL}")
-        except ValueError:
-            print(f"{Fore.RED}✖ Vui lòng nhập số hợp lệ!{Style.RESET_ALL}")
-
-    input(f"{Fore.GREEN}Nhập 1 để bắt đầu tool...{Style.RESET_ALL}")
-    create_multiple_accounts(num_accounts, filename, proxy_file,max_threads)
+    input(f"{Fore.GREEN}Nhấn Enter để bắt đầu...{Style.RESET_ALL}")
+    create_multiple_accounts(num_accounts, filename, proxy_file)
 
 if __name__ == "__main__":
     main()
