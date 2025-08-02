@@ -165,7 +165,7 @@ def worker(task_queue, filename, proxies):
         task_queue.task_done()
         time.sleep(random.uniform(3, 6))
 
-def create_multiple_accounts(num_accounts, filename, proxy_file=None, max_threads=10):
+def create_multiple_accounts(num_accounts, filename, proxy_file=None, max_threads=max_threads):
     clear_screen()
     print(f"{Fore.GREEN}╔════════════════════════════════════╗{Style.RESET_ALL}")
     print(f"{Fore.GREEN}║      BẮT ĐẦU TẠO {num_accounts} TÀI KHOẢN      ║{Style.RESET_ALL}")
@@ -179,8 +179,8 @@ def create_multiple_accounts(num_accounts, filename, proxy_file=None, max_thread
     for i in range(1, num_accounts + 1):
         task_queue.put(i)
 
-    # Giới hạn số luồng tối đa 10
-    max_threads = min(max_threads, 10)
+    # Giới hạn số luồng tối đa 5
+    max_threads = min(max_threads)
     threads = []
     for _ in range(max_threads):
         t = threading.Thread(target=worker, args=(task_queue, filename, proxies))
@@ -226,10 +226,6 @@ def main():
     if proxy_file:
         print(f"{Fore.YELLOW}File proxy: {proxy_file}{Style.RESET_ALL}")
     print(f"{Fore.CYAN}--------------------------------------------{Style.RESET_ALL}")
-    input(f"{Fore.GREEN}Nhập 1 để bắt đầu tool...{Style.RESET_ALL}")
-    create_multiple_accounts(num_accounts, filename, proxy_file)
-
-if __name__ == "__main__":
     while True:
         try:
             max_threads = int(input(f"{Fore.GREEN}Nhập số luồng reg (tối đa 5): {Style.RESET_ALL}"))
@@ -239,4 +235,8 @@ if __name__ == "__main__":
         except ValueError:
             print(f"{Fore.RED}✖ Vui lòng nhập số hợp lệ!{Style.RESET_ALL}")
 
+    input(f"{Fore.GREEN}Nhập 1 để bắt đầu tool...{Style.RESET_ALL}")
+    create_multiple_accounts(num_accounts, filename, proxy_file,max_threads)
+
+if __name__ == "__main__":
     main()
