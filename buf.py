@@ -6,7 +6,7 @@ from rich.table import Table
 from rich.console import Console
 
 API_URL = "http://apihoangthanhtung.ddns.net:5000"
-API_KEY = "tungvip"
+API_KEY = "Nghuyvippro"
 console = Console()
 
 def clear():
@@ -14,7 +14,7 @@ def clear():
 
 def banner():
     console.print("=" * 50, style="bold green")
-    console.print("      [cyan]TOOL BUFF TIKTOK BY PHUOCAN[/cyan]", justify="center")
+    console.print("[cyan]TOOL BUFF TIKTOK BY PHUOCAN[/cyan]", justify="center")
     console.print("=" * 50, style="bold green")
 
 def send_request(link, action, index):
