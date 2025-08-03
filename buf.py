@@ -1,7 +1,42 @@
-import requests
-import time
-import re
-from pystyle import Colors,Colorate,Center
+#!/usr/bin/env python3
+
+try:
+
+    import requests, time, os, re, json, sys
+
+    from rich import print as println
+    
+    from pystyle import Colors,Colorate,Center
+
+    import platform
+
+    import random
+
+    from rich.console import Console
+
+    from rich.panel import Panel
+
+    from fake_useragent import UserAgent
+
+except ModuleNotFoundError:
+
+    print("Required modules are not installed. Please run 'pip install -r requirements.txt'.")
+
+    sys.exit(1)
+
+
+
+BASE_URL = "https://socioblend.com"
+
+SUCCESS, FAILED, DELAY = [], [], {
+
+    "TIME": 0
+
+}
+
+CONSOLE = Console()
+
+
 gradient_options = [
     Colors.red_to_yellow,
     Colors.green_to_cyan,
@@ -9,34 +44,23 @@ gradient_options = [
     Colors.yellow_to_red,
     Colors.blue_to_purple,
     Colors.rainbow,
-]    # Tool by phước, Không xóa dòng này để tôn trọng tác giả.
-# hàm chống bug mạng tránh mấy a bug lỏd 🤟
-def checkmang():
-    try:
-        response = requests.get("https://google.com/", timeout=5)
-        return True
-    except requests.ConnectionError:
-        return False
-if not checkmang():
-    print("\033[1;31mCheck Mạng Wifi Hoặc 4G ! ")
-    sleep(0.5)
-    exit()
-	
-def se3():
+]
+
+def banner():
     os.system("cls" if os.name == "nt" else "clear")
     os_type = platform.system()
     os_text = f"Hệ điều hành: {os_type}"
 
-    # Banner ASCII    # Tool by phước, Không xóa dòng này để tôn trọng tác giả.
+    # Banner ASCII     # Tool by phước, Không xóa dòng này để tôn trọng tác giả.
     ascii = """
            © COPYRIGHT BY PHƯỚC AN + BVZONE 2025
 
-        ██████╗░██╗░░░██╗████████╗░█████╗░░█████╗░██╗░░░░░
-        ██╔══██╗██║░░░██║╚══██╔══╝██╔══██╗██╔══██╗██║░░░░░
-        ██████╦╝╚██╗░██╔╝░░░██║░░░██║░░██║██║░░██║██║░░░░░
-        ██╔══██╗░╚████╔╝░░░░██║░░░██║░░██║██║░░██║██║░░░░░
-        ██████╦╝░░╚██╔╝░░░░░██║░░░╚█████╔╝╚█████╔╝███████╗
-        ╚═════╝░░░░╚═╝░░░░░░╚═╝░░░░╚════╝░░╚════╝░╚══════╝
+██████╗░██╗░░░██╗████████╗░█████╗░░█████╗░██╗░░░░░
+██╔══██╗██║░░░██║╚══██╔══╝██╔══██╗██╔══██╗██║░░░░░
+██████╦╝╚██╗░██╔╝░░░██║░░░██║░░██║██║░░██║██║░░░░░
+██╔══██╗░╚████╔╝░░░░██║░░░██║░░██║██║░░██║██║░░░░░
+██████╦╝░░╚██╔╝░░░░░██║░░░╚█████╔╝╚█████╔╝███████╗
+╚═════╝░░░░╚═╝░░░░░░╚═╝░░░░╚════╝░░╚════╝░╚══════╝
 
 """
 
@@ -50,73 +74,243 @@ def se3():
     # Quote sự kiện
     
     print(Center.XCenter(Colorate.Horizontal(gradient, f"\n{os_text}")))
-    print(Center.XCenter(Colorate.Horizontal(gradient, "Box Zalo: https://zalo.me/g/bhbotm174\n")))
-    print(Center.XCenter(Colorate.Horizontal(gradient, "Admin: Phạm An Phước + Trần Dương Ngọc Thành\n")))
-    print(Center.XCenter(Colorate.Horizontal(gradient, "Thông Báo : Key sẽ bán với giá siêu rẻ 500đ/1 day \n")))
+    print(Center.XCenter(Colorate.Horizontal(gradient, "🔗 Box Zalo: https://zalo.me/g/bhbotm174\n")))
+    print(Center.XCenter(Colorate.Horizontal(gradient, "🔗 Admin: Phạm An Phước + Trần Dương Ngọc Thành\n")))
 
-    # Tool by phước, Không xóa dòng này để tôn trọng tác giả.
-cookies = {
-    'PHPSESSID': '501ca64fe86f0376d5d67f4dd5bd20d3',
-    # ... thêm các cookie khác
-}
 
-headers = {
-    'authority': 'socioblend.com',
-    'content-type': 'application/x-www-form-urlencoded',
-    'origin': 'https://socioblend.com',
-    'referer': 'https://socioblend.com/free-tiktok-views',
-    'user-agent': 'Mozilla/5.0 (Linux; Android 11; SM-A207F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Mobile Safari/537.36',
-}
 
-def send_tiktok(video_url):
-    data = {'video_url': video_url}
-    response = requests.post('https://socioblend.com/submit-tiktok.php', cookies=cookies, headers=headers, data=data)
-    return response.text
+    
 
-def extract_wait_time(response_text):
-    # Tìm thời gian chờ trong thông báo (nếu có)
-    match = re.search(r'(\d+)\s?(seconds|minutes|giây|phút)', response_text)
-    if match:
-        value = int(match.group(1))
-        unit = match.group(2)
-        if 'minute' in unit or 'phút' in unit:
-            return value * 60
-        return value
-    return 60 * 20  # Mặc định chờ 20 phút nếu không rõ
 
-def auto_loop(video_url, max_loops=None):
-    count = 0
-    while True:
-        count += 1
-        print(f"\n🔁 Lần gửi thứ {count}...")
+class SubmitTikTokViews:
 
-        try:
-            res = send_tiktok(video_url)
-        except Exception as e:
-            print(f"❌ Lỗi gửi request: {e}")
-            time.sleep(60)
-            continue
 
-        if 'success' in res.lower():
-            print("✅ Thành công!")
-            wait_time = 60 * 20  # Mặc định 20 phút
-        elif 'wait' in res.lower() or 'cooldown' in res.lower():
-            print("⏳ Đang cooldown...")
-            wait_time = extract_wait_time(res)
-        elif 'already' in res.lower():
-            print("⚠️ Đã gửi trước đó, chờ tiếp...")
-            wait_time = extract_wait_time(res)
+
+    def __init__(self, video_url: str) -> None:
+
+        """Initialize the SubmitTikTokViews class."""
+
+        self.video_url = video_url
+
+        self.session = requests.Session()
+
+
+
+    def RetrieveCookies(self) -> str:
+
+        """Retrieve cookies from the session."""
+
+        self.session.headers = {
+
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+
+            "Accept-Encoding": "gzip, deflate",
+
+            "Accept-Language": "en-US,en;q=0.9",
+
+            "Connection": "keep-alive",
+
+            "Host": "socioblend.com",
+
+            "Sec-Fetch-Dest": "document",
+
+            "Sec-Fetch-Mode": "navigate",
+
+            "Sec-Fetch-Site": "none",
+
+            "Sec-Fetch-User": "?1",
+
+            "Upgrade-Insecure-Requests": "1",
+
+            "User-Agent": f"{UserAgent().random}"
+
+        }
+
+        response = self.session.get(f"{BASE_URL}/free-tiktok-views", verify=True, allow_redirects=True)
+
+
+
+        cookies_string = "; ".join([f"{key}={value}" for key, value in self.session.cookies.get_dict().items()])
+
+
+
+        return cookies_string
+
+    
+
+    def SubmitForm(self, cookies: str) -> None:
+
+        """Submit the form with the video URL and cookies."""
+
+        global SUCCESS, FAILED, DELAY
+
+        data = {
+
+            "video_url": f"{self.video_url}",
+
+        }
+
+        self.session.headers.update(
+
+            {
+
+                "Content-Length": f"{len(json.dumps(data))}",
+
+                "Content-Type": "application/x-www-form-urlencoded",
+
+                "Sec-Fetch-Site": "same-origin",
+
+                "Sec-Fetch-Mode": "cors",
+
+                "Cookie": f"{cookies}",
+
+                "Accept": "*/*",
+
+                "Sec-Fetch-Dest": "empty",
+
+                "Origin": f"{BASE_URL}",
+
+                "Referer": f"{BASE_URL}/free-tiktok-views",
+
+            }
+
+        )
+
+
+
+        response = self.session.post(f"{BASE_URL}/submit-tiktok.php", data=data, verify=True, allow_redirects=False)
+
+        if '"status":"success"' in response.text:
+
+            SUCCESS.append(f"{response.status_code} - {response.reason}")
+
+            CONSOLE.print(
+
+                Panel(f"""[bold white]Status:[bold green] Đã gửi view thành công!  🤑🤑🤑
+
+[bold white]Link:[bold red] {self.video_url}
+
+[bold white]Views:[bold yellow] +1000""", width=59, style="bold bright_black", title="[bold bright_black]> [Successfully] <")
+
+            )
+
+        elif '"retry_after"' in response.text:
+
+            retry_after = re.search(r'"retry_after":(\d+)', response.text)
+
+            if retry_after: DELAY["TIME"] = int(retry_after.group(1))
+
+        elif 'The URL you entered is not a valid TikTok video link.' in response.text:
+
+            CONSOLE.print(
+
+                Panel("[bold red]URL bạn nhập không phải là liên kết video TikTok hợp lệ. Vui lòng kiểm tra lại liên kết.", width=59, style="bold bright_black", title="[bold bright_black]> [Invalid Link] <")
+
+            )
+
+            sys.exit(1)
+
         else:
-            print("❌ Phản hồi không xác định:\n", res)
-            wait_time = 60 * 10
 
-        print(f"⏱️ Chờ {wait_time // 60} phút {wait_time % 60} giây...\n")
-        time.sleep(wait_time)
+            FAILED.append(f"{response.status_code} - {response.reason}")
 
-        if max_loops and count >= max_loops:
-            break
+            println(f"[bold bright_black]   ╰─>[bold red] THẤT BẠI KHI BUFF VIEW!             ", end="\r")
 
-if __name__ == "__main__":
+            time.sleep(5)
+
+
+
+        return None
+
+
+
+def Main() -> None:
+
+    """Main function to run the script."""
+
+    os.system("clear" if os.name == "posix" else "cls")
+
     banner()
-    link = input("🔗 Nhập link TikTok: ")
-    auto_loop(link)
+
+    CONSOLE.print(
+
+        Panel(f"[bold yellow]Vui lòng nhập liên kết video TikTok của bạn. Hãy nhớ kiểm tra liên kết trước khi nhấn enter.\nTôi khuyên bạn nên lấy liên kết từ trình duyệt của mình!", width=59, style="bold bright_red", title="[bold bright_black]> [Tiktok Link] <", subtitle="[bold bright_black]╭──────", subtitle_align="left")
+
+    )
+
+    video_url = CONSOLE.input("[bold bright_red]   ╰─> ").strip()
+
+    if video_url.startswith("https://www.tiktok.com/@") or video_url.startswith("https://tiktok.com/@"):
+
+        CONSOLE.print(
+
+            Panel("[bold white]Vui lòng đợi một lát..., Bạn có thể sử dụng[bold red] CTRL + Z[bold white] để dừng tool hoặc [bold yellow] CTRL + C[bold white] nếu bị treo!", width=59, style="bold bright_black", title="[bold bright_black]> [Processing] <")
+
+        )
+
+        time.sleep(2)
+
+        while True:
+
+            try:
+
+                if DELAY["TIME"] != 0:
+
+                    for timer in range(DELAY["TIME"], 0, -1):
+
+                        println(f"[bold bright_black]   ╰─>[bold white] BẮT ĐẦU[bold green] {timer}[bold white]/[bold green]{DELAY['TIME']}[bold white] THÀNH CÔNG:-[bold green]{len(SUCCESS)}[bold white] THẤT BẠI:-[bold red]{len(FAILED)}     ", end="\r")
+
+                        time.sleep(1)
+
+                    DELAY["TIME"] = 0
+
+                    println(f"[bold bright_black]   ╰─>[bold yellow] BẮT ĐẦU GỬI TIẾP!                            ", end="\r")
+
+                    time.sleep(5)
+
+                    continue
+
+                println(f"[bold bright_black]   ╰─>[bold green] BUFF THÀNH CÔNG!               ", end="\r")
+
+                time.sleep(2)
+
+
+
+                submitter = SubmitTikTokViews(video_url)
+
+                cookies = submitter.RetrieveCookies()
+
+                submitter.SubmitForm(cookies)
+
+            except requests.exceptions.RequestException:
+
+                println(f"[bold bright_black]   ╰─>[bold red] KẾT NỐI CỦA BẠN ĐANG GẶP SỰ CỐ!!     ", end="\r")
+
+                time.sleep(10)
+
+                continue
+
+            except KeyboardInterrupt:
+
+                continue
+
+            except Exception as e:
+
+                println(f"[bold bright_black]   ╰─>[bold red] {str(e).upper()}!", end="\r")
+
+                time.sleep(5)
+
+                continue
+
+    else:
+
+        CONSOLE.print(
+
+            Panel("[bold red]Rất tiếc, bạn đã nhập sai liên kết video TikTok. Vui lòng thử lại theo định dạng https://www.tiktok.com/@... Hoặc vào checkshorturl.com để thử lại...", width=59, style="bold bright_black", title="[bold bright_black]> [Wrong Link] <")
+
+        )
+
+        sys.exit(1)
+
+
+Main()
