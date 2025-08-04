@@ -1,121 +1,100 @@
 import requests
-import random
 import time
-from rich import print
+import re
+from datetime import datetime
+from rich.console import Console
 from rich.panel import Panel
 
-USER_AGENTS = [
-    'Mozilla/5.0 (Linux; Android 10; SM-A107F)',
-    'Mozilla/5.0 (iPhone; CPU iPhone OS 15_0)',
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
-    'Mozilla/5.0 (Linux; Android 12; Redmi Note 10 Pro)',
-]
+console = Console()
 
-def random_user_agent():
-    return random.choice(USER_AGENTS)
+buff_history = {}  # lưu số lần buff mỗi video (reset mỗi ngày)
 
-def get_headers():
-    ua = random_user_agent()
-    return {
-        'user-agent': ua,
-        'accept-language': 'vi-VN,vi;q=0.9,en-US;q=0.6,en;q=0.5',
-        'referer': 'https://myinstafollow.com/free-tiktok-tools/',
-        'origin': 'https://myinstafollow.com',
-    }
+def banner():
+    console.clear()
+    console.print(Panel.fit(
+        "[bold cyan]TOOL BUFF VIEW TIKTOK[/bold cyan]\n[green]Giới hạn 5 lần/ngày mỗi video[/green]",
+        title="[bold red]BUFF VIP",
+        border_style="bold magenta"
+    ))
 
-def buff_views(link, amount):
-    if amount < 100:
-        amount = 100  # Đảm bảo tối thiểu là 100 view
-    
-    headers = get_headers()
-    files = {
-        'service': (None, '7583'),
-        'postlink': (None, link),
-        'tiktokviewsQuantity': (None, str(amount)),
-        'extended_user_agent': (None, f'User-agent header: {headers["user-agent"]}'),
-    }
-    res = requests.post(
-        'https://myinstafollow.com/themes/vision/part/free-tiktok-views/submitForm.php',
-        headers=headers,
-        files=files
-    )
-    return res.text
-
-def buff_likes(link, amount):
-    if amount < 10:
-        amount = 10  # đảm bảo tối thiểu 10 like
-
-    headers = get_headers()
-    files = {
-        'service': (None, '6455'),
-        'postlink': (None, link),
-        'tiktoklikesQuantity': (None, str(amount)),
-        'extended_user_agent': (None, f'User-agent header: {headers["user-agent"]}'),
-    }
-    res = requests.post(
-        'https://myinstafollow.com/themes/vision/part/free-tiktok-likes/submitForm.php',
-        headers=headers,
-        files=files
-    )
-    return res.text
-
-def cooldown_timer(seconds):
-    print(Panel(f"[yellow]⏳ Chờ [bold]{seconds // 60} phút[/bold] để tiếp tục..."))
+def countdown(seconds):
     for i in range(seconds, 0, -1):
-        mins, secs = divmod(i, 60)
-        print(f"[cyan]⏱  Còn lại: [bold]{mins:02d}:{secs:02d}[/bold]", end='\r')
+        console.print(f"[yellow]Chờ {i}s...[/yellow]", end="\r")
         time.sleep(1)
-    print("\n[green]✅ Hết thời gian chờ.[/green]")
+    print()
 
-def main():
-    print(Panel("[bold green]TOOL BUFF TIKTOK[/bold green]"))
+def get_video_list():
+    try:
+        with open("video_list.txt", "r", encoding="utf-8") as f:
+            links = [line.strip() for line in f if line.strip()]
+            if links:
+                return links
+    except:
+        pass
+    # fallback: nhập thủ công
+    console.print("[cyan]Không tìm thấy file [bold]video_list.txt[/bold] hoặc file trống.")
+    link = input("➤ Nhập link TikTok thủ công: ").strip()
+    return [link] if link else []
 
-    # Nhập nhiều link
-    links = []
-    while True:
-        link = input("[🔗] Nhập link TikTok (Enter để dừng): ").strip()
-        if link == "":
-            break
-        links.append(link)
-
-    if not links:
-        print("[red]❌ Không có link nào được nhập![/red]")
-        return
-
-    mode = input("[⚙️] Chọn chế độ (1: View, 2: Tym, 3: View + Tym): ").strip()
-    amount = int(input("[🔢] Nhập số lượng muốn buff mỗi link: "))
-
-    for idx, link in enumerate(links, 1):
-        print(Panel(f"[bold cyan]🎯 Bắt đầu buff link thứ {idx}: {link}"))
-
-        if mode == "1":
-            print(Panel("[blue]🚀 Buff View..."))
-            res = buff_views(link, amount)
-            print("[green]Kết quả:[/green]", res[:200])
-
-        elif mode == "2":
-            print(Panel("[magenta]💓 Buff Tym..."))
-            res = buff_likes(link, amount)
-            print("[green]Kết quả:[/green]", res[:200])
-
-        elif mode == "3":
-            print(Panel("[blue]🚀 Buff View trước..."))
-            res1 = buff_views(link, amount)
-            print("[green]Kết quả:[/green]", res1[:200])
-
-            print("[yellow]⏳ Đợi 90s trước khi buff Tym...[/yellow]")
-            time.sleep(90)
-
-            print(Panel("[magenta]💓 Buff Tym..."))
-            res2 = buff_likes(link, amount)
-            print("[green]Kết quả:[/green]", res2[:200])
-
+def buff_view(video_url):
+    url_api = f"http://apihoangthanhtung.ddns.net:5000/web={video_url}view?key=duongca1"
+    try:
+        res = requests.get(url_api, timeout=10)
+        if res.status_code == 200:
+            data = res.json()
+            status = data.get("status", "")
+            message = data.get("message", "")
+            if status == "success":
+                console.print(f"[green]✅ Thành công:[/green] {message}")
+                return 0
+            elif status == "wait":
+                m = re.search(r'(\d+)\s*giay', message)
+                seconds = int(m.group(1)) if m else 30
+                console.print(f"[yellow]{message}[/yellow]")
+                return seconds
+            else:
+                console.print(f"[red]⚠ Phản hồi lạ:[/red] {message}")
+                return 15
         else:
-            print("[red]❌ Sai chế độ. Dừng tool.[/red]")
-            return
+            console.print(f"[red]❌ Lỗi HTTP {res.status_code}[/red]")
+            return 20
+    except Exception as e:
+        console.print(f"[red]❌ Lỗi kết nối API: {e}[/red]")
+        return 20
 
-        print(Panel(f"[bold green]✅ Hoàn tất buff cho link {idx}[/bold green]"))
+def reset_history_if_new_day():
+    now = datetime.now()
+    today = now.strftime("%Y-%m-%d")
+    if getattr(reset_history_if_new_day, "last_day", None) != today:
+        buff_history.clear()
+        reset_history_if_new_day.last_day = today
 
-    
 if __name__ == "__main__":
-    main()
+    banner()
+    videos = get_video_list()
+    if not videos:
+        console.print("[red]Không có video nào để buff![/red]")
+        exit()
+
+    console.print(f"[bold green]Tổng video cần buff: {len(videos)}[/bold green]")
+    console.print("[cyan]Tự động buff mỗi video, giới hạn 5 lần/ngày. Nhấn Ctrl + C để thoát[/cyan]")
+
+    try:
+        while True:
+            reset_history_if_new_day()
+            for video in videos:
+                count = buff_history.get(video, 0)
+                if count >= 5:
+                    console.print(f"[yellow]🚫 {video} đã đạt giới hạn 5 lần hôm nay.[/yellow]")
+                    continue
+                delay = buff_view(video)
+                buff_history[video] = count + 1
+                if delay > 0:
+                    countdown(delay)
+                else:
+                    time.sleep(2)
+            console.print("[bold magenta]🔁 Đã hoàn tất 1 vòng. Lặp lại sau 10 giây...[/bold magenta]")
+            time.sleep(10)
+
+    except KeyboardInterrupt:
+        console.print("\n[bold red]⛔ Đã thoát tool theo yêu cầu.[/bold red]")
