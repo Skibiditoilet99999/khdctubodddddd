@@ -68,7 +68,7 @@ def cooldown_timer(seconds):
     print("\n[green]✅ Hết thời gian chờ.[/green]")
 
 def main():
-    print(Panel("[bold green]✨ TOOL BUFF TIKTOK KHÔNG COOKIE ✨[/bold green]"))
+    print(Panel("[bold green]TOOL BUFF TIKTOK[/bold green]"))
 
     # Nhập nhiều link
     links = []
