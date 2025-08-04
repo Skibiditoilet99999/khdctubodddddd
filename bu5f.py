@@ -24,6 +24,9 @@ def get_headers():
     }
 
 def buff_views(link, amount):
+    if amount < 100:
+        amount = 100  # Đảm bảo tối thiểu là 100 view
+    
     headers = get_headers()
     files = {
         'service': (None, '7583'),
@@ -39,6 +42,9 @@ def buff_views(link, amount):
     return res.text
 
 def buff_likes(link, amount):
+    if amount < 10:
+        amount = 10  # đảm bảo tối thiểu 10 like
+
     headers = get_headers()
     files = {
         'service': (None, '6455'),
@@ -62,7 +68,7 @@ def cooldown_timer(seconds):
     print("\n[green]✅ Hết thời gian chờ.[/green]")
 
 def main():
-    print(Panel("[bold green]TOOL BUFF TIKTOK [/bold green]"))
+    print(Panel("[bold green]✨ TOOL BUFF TIKTOK KHÔNG COOKIE ✨[/bold green]"))
 
     # Nhập nhiều link
     links = []
@@ -76,7 +82,11 @@ def main():
         print("[red]❌ Không có link nào được nhập![/red]")
         return
 
-        mode = input("[⚙️] Chọn chế độ (1: View, 2: Tym, 3: View + Tym): ").strip()
+    mode = input("[⚙️] Chọn chế độ (1: View, 2: Tym, 3: View + Tym): ").strip()
+    amount = int(input("[🔢] Nhập số lượng muốn buff mỗi link: "))
+
+    for idx, link in enumerate(links, 1):
+        print(Panel(f"[bold cyan]🎯 Bắt đầu buff link thứ {idx}: {link}"))
 
         if mode == "1":
             print(Panel("[blue]🚀 Buff View..."))
@@ -93,6 +103,9 @@ def main():
             res1 = buff_views(link, amount)
             print("[green]Kết quả:[/green]", res1[:200])
 
+            print("[yellow]⏳ Đợi 90s trước khi buff Tym...[/yellow]")
+            time.sleep(90)
+
             print(Panel("[magenta]💓 Buff Tym..."))
             res2 = buff_likes(link, amount)
             print("[green]Kết quả:[/green]", res2[:200])
@@ -103,8 +116,6 @@ def main():
 
         print(Panel(f"[bold green]✅ Hoàn tất buff cho link {idx}[/bold green]"))
 
-    print(Panel("[bold red]🛑 Tool sẽ chờ 4 giờ trước khi tiếp tục buff...[/bold red]"))
-    cooldown_timer(14400)
-
+    
 if __name__ == "__main__":
     main()
